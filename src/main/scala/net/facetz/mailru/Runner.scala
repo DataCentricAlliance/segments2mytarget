@@ -17,7 +17,7 @@ object Runner {
                     clientSecret: String = ""
                      )
 
-  //args example: -i /tmp/gz -c someclient -s somesecret -p dl -u
+  //args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
   def main(args: Array[String]) {
     val parser = new scopt.OptionParser[Config]("mailru-segment-exporter") {
       head("mailru-segment-exporter")
