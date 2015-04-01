@@ -25,7 +25,7 @@ object Runner {
         .valueName("<workdir>")
         .action({ (value, config) => config.copy(workingDirectory = value)})
         .text("ex. /opt/segments")
-        .required() //TODO get from workingdirectory by default
+        .required()
       opt[String]('p', "prefix")
         .valueName("<prefix>")
         .action({ (value, config) => config.copy(partnerPrefix = value)})
