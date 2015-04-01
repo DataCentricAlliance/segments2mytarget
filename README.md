@@ -35,6 +35,8 @@ java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar -i /tmp/gz 
             source filename pattern in workdir, default .*(.gz)$
       -u | --upload
             upload segments to mailru or not. false by default
+      -a <apiurl> | --apiurl <apiurl>
+            mailru api url, https://target.my.com by default
       -c <client> | --client <client>
             your mailru client_id
       -s <secret> | --secret <secret>

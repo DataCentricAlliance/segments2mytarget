@@ -13,6 +13,7 @@ object Runner {
                     dateStr: String = today,
                     regexp: String = ".*[.gz]",
                     upload: Boolean = false,
+                    apiUrl: String = "https://target.my.com",
                     clientId: String = "",
                     clientSecret: String = ""
                      )
@@ -49,6 +50,10 @@ object Runner {
         .valueName("<upload>")
         .action({ (_, config) => config.copy(upload = true)})
         .text("upload segments to mailru or not. false by default")
+      opt[Unit]('a', "apiurl")
+        .valueName("<apiurl>")
+        .action({ (_, config) => config.copy(upload = true)})
+        .text("mailru api url, https://target.my.com by default")
       opt[String]('c', "client")
         .valueName("<client>")
         .action({ (value, config) => config.copy(clientId = value)})

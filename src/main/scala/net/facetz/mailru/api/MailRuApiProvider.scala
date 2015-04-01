@@ -3,12 +3,15 @@ package net.facetz.mailru.api
 import java.io.{File, FileInputStream, IOException}
 
 import argonaut.Argonaut._
+import net.facetz.mailru.helper.SimpleLogger
 import org.apache.commons.io.IOUtils
 
 import scala.util.Try
 import scalaj.http._
 
-trait MailRuApiProvider {
+trait MailRuApiProvider extends SimpleLogger {
+
+  protected val apiUrl: String
 
   protected def clientId: String
 
@@ -30,7 +33,7 @@ trait MailRuApiProvider {
   protected def auth(req: HttpRequest, token: String) = req.header("Authorization", s"Bearer $token")
 
   protected def getAuthToken: Option[String] = {
-    val response: HttpResponse[String] = Http("https://target.mail.ru/api/v2/oauth2/token.json")
+    val response: HttpResponse[String] = Http(s"$apiUrl/api/v2/oauth2/token.json")
       .headers("Content-Type" -> "application/x-www-form-urlencoded")
       .params("grant_type" -> "client_credentials", "client_id" -> clientId, "client_secret" -> clientSecret)
       .setTimeouts()
@@ -43,12 +46,13 @@ trait MailRuApiProvider {
         case None => None
       }
     } else {
+      log.error(response.body)
       None
     }
   }
 
   protected def getRemarketingUsersList(authToken: String): Option[List[RemarketingUserListResponseItem]] = {
-    val findUserListsResponse: HttpResponse[String] = Http("https://target.mail.ru/api/v1/remarketing_users_lists.json")
+    val findUserListsResponse: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketing_users_lists.json")
       .addAuthToken(authToken)
       .setTimeouts()
       .asString
@@ -61,7 +65,7 @@ trait MailRuApiProvider {
   }
 
   protected def getRemarketingAuditories(authToken: String): Option[List[RemarketingAuditoryItem]] = {
-    val existedRemarketings: HttpResponse[String] = Http("https://target.mail.ru/api/v1/remarketings.json")
+    val existedRemarketings: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketings.json")
       .addAuthToken(authToken)
       .setTimeouts()
       .asString
@@ -70,7 +74,7 @@ trait MailRuApiProvider {
   }
 
   protected def createRemarketingAuditory(authToken: String, request: CreateRemarketingAuditoryRequest): Option[String] = {
-    val createResponse: HttpResponse[String] = Http("https://target.mail.ru/api/v1/remarketings.json")
+    val createResponse: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketings.json")
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
       .setTimeouts()
@@ -92,7 +96,7 @@ trait MailRuApiProvider {
         try {
           val array: Array[Byte] = IOUtils.toByteArray(is)
           val result: HttpResponse[String] =
-            Http("https://target.mail.ru/api/v1/remarketing_users_lists.json")
+            Http(s"$apiUrl/api/v1/remarketing_users_lists.json")
               .addAuthToken(authToken)
               .setTimeouts()
               .postMulti(
@@ -102,11 +106,12 @@ trait MailRuApiProvider {
               .asString
           val overLimitValidation = result.body.decodeValidation[OverTheLimitResponse]
           val goodItemValidation = result.body.decodeValidation[RemarketingUserListResponseItem]
-          if (overLimitValidation.isSuccess) {
-            Left(overLimitValidation.getOrElse(null))
-          } else if (goodItemValidation.isSuccess) {
+          if (goodItemValidation.isSuccess) {
             Right(goodItemValidation.getOrElse(null))
+          } else if (overLimitValidation.isSuccess) {
+            Left(overLimitValidation.getOrElse(null))
           } else {
+            log.error(result.body)
             throw new RuntimeException("bad response")
           }
         } catch {
