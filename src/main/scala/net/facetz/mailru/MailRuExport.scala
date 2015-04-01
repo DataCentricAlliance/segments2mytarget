@@ -10,7 +10,7 @@ object MailRuExport extends SimpleLogger {
   trait MailRuSegmentFileConfigProvider {
     this: MailRuSegmentFileProcessor =>
 
-    private val config = ConfigHolder.getConfiguration
+    private val config = ConfigHolder.config
 
     override protected val dateStr = config.dateStr
     override protected val outputFolderName = config.outputFolderName
@@ -33,7 +33,7 @@ object MailRuExport extends SimpleLogger {
   def run: Unit = {
     log.info("mailRuExporter running...")
 
-    if(ConfigHolder.getConfiguration.upload) {
+    if(ConfigHolder.config.upload) {
       new Exporter().startProcessing()
     } else {
       new FilesTransformer().startProcessing()

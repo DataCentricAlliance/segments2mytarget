@@ -6,7 +6,7 @@ import net.facetz.mailru.api.MailRuApiProvider
 trait MailRuApiConfigProvider {
   this: MailRuApiProvider =>
 
-  private val config = ConfigHolder.getConfiguration
+  private val config = ConfigHolder.config
 
   override protected val clientId = config.clientId
   override protected val clientSecret = config.clientSecret

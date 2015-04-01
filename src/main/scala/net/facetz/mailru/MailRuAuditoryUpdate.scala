@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import net.facetz.mailru.helper.SimpleLogger
-import net.facetz.mailru.directory.MailRuAuditoryUpdater
+import net.facetz.mailru.auditory.MailRuAuditoryUpdater
 import net.facetz.mailru.helper.MailRuApiConfigProvider
 
 @Deprecated //atwork

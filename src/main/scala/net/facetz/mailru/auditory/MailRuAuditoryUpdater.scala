@@ -1,4 +1,4 @@
-package net.facetz.mailru.directory
+package net.facetz.mailru.auditory
 
 import net.facetz.mailru.helper.SimpleLogger
 import net.facetz.mailru.api._
@@ -48,7 +48,6 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   }
 
   //TODO test below
-
   protected def updateRetargetingAuditory(token: String, segmentIds: Iterable[String]) = {
     val existedRemarketingsAuditory: List[RemarketingAuditoryItem] = getRemarketingAuditories(token) match {
       case Some(response) => response

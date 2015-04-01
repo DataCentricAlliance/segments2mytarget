@@ -1,5 +1,7 @@
 # Mailru segment exporter
 
+## Requirements
+- sbt 0.13.7
 
 ## For make executable jar:
 ```bash

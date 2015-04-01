@@ -6,6 +6,4 @@ object ConfigHolder {
   
   var config: Config = null
 
-  def getConfiguration = config
-
 }
