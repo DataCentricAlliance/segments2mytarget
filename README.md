@@ -3,7 +3,6 @@
 
 ## For make executable jar:
 ```
-sbt compile
 sbt assembly
 ```
 
