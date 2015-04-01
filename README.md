@@ -9,7 +9,7 @@ sbt assembly
 ## Launch
 ### Full params
 ```bash
-java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar --workdir /tmp/gz --outputname export-results --date 20150330 --regexp .*(.gz)$ --partner pr --upload --client someclient --secret somesecret
+java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar --workdir /tmp/gz --outputname export-results --date 20150330 --regexp ".*(.gz)$" --partner pr --upload --client someclient --secret somesecret
 ```
 
 ### Simple with defaults
