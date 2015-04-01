@@ -1,9 +1,9 @@
-package net.facetz.export.mr.mailru.segment
+package net.facetz.mailru.segment
 
 import java.io._
 import java.util.zip.GZIPInputStream
 
-import mailru.helper.SimpleLogger
+import net.facetz.mailru.helper.SimpleLogger
 
 import scala.collection.mutable
 import scala.io.Source

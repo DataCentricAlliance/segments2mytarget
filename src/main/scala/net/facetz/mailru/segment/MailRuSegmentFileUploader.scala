@@ -1,9 +1,9 @@
-package net.facetz.export.mr.mailru.segment
+package net.facetz.mailru.segment
 
 import java.io.File
 
-import mailru.helper.SimpleLogger
-import net.facetz.export.mr.mailru.api._
+import net.facetz.mailru.helper.SimpleLogger
+import net.facetz.mailru.api._
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success}

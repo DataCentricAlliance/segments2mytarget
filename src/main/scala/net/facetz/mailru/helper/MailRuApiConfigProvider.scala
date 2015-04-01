@@ -1,7 +1,7 @@
-package net.facetz.export.mr.mailru.helper
+package net.facetz.mailru.helper
 
-import mailru.ConfigHolder
-import net.facetz.export.mr.mailru.api.MailRuApiProvider
+import net.facetz.mailru.ConfigHolder
+import net.facetz.mailru.api.MailRuApiProvider
 
 trait MailRuApiConfigProvider {
   this: MailRuApiProvider =>

@@ -1,6 +1,6 @@
-package mailru
+package net.facetz.mailru
 
-import mailru.Runner.Config
+import net.facetz.mailru.Runner.Config
 
 object ConfigHolder {
   

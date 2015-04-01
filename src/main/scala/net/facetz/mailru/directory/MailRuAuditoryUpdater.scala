@@ -1,7 +1,7 @@
-package net.facetz.export.mr.mailru.directory
+package net.facetz.mailru.directory
 
-import mailru.helper.SimpleLogger
-import net.facetz.export.mr.mailru.api._
+import net.facetz.mailru.helper.SimpleLogger
+import net.facetz.mailru.api._
 import org.apache.commons.lang3.StringUtils
 
 import scala.collection.mutable

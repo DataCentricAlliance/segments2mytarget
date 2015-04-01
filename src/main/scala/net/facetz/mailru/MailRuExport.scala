@@ -1,11 +1,9 @@
-package net.facetz.export.mr.mailru
+package net.facetz.mailru
 
 import java.io.File
 
-import mailru.ConfigHolder
-import mailru.helper.SimpleLogger
-import net.facetz.export.mr.mailru.helper.MailRuApiConfigProvider
-import net.facetz.export.mr.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader}
+import net.facetz.mailru.helper.{MailRuApiConfigProvider, SimpleLogger}
+import net.facetz.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader}
 
 object MailRuExport extends SimpleLogger {
 

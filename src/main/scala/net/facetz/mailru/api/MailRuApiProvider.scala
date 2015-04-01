@@ -1,4 +1,4 @@
-package net.facetz.export.mr.mailru.api
+package net.facetz.mailru.api
 
 import java.io.{File, FileInputStream, IOException}
 

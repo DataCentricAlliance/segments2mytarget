@@ -1,4 +1,4 @@
-package mailru.helper
+package net.facetz.mailru.helper
 
 trait SimpleLogger {
   protected val log = new Log()

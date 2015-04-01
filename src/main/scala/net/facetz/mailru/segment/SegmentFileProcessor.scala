@@ -1,4 +1,4 @@
-package net.facetz.export.mr.mailru.segment
+package net.facetz.mailru.segment
 
 import java.io.File
 
