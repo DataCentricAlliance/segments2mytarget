@@ -116,7 +116,7 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   protected def addWriter(segmentId: String): (BufferedWriter, File) = {
     indexBySegmentId(segmentId) = indexBySegmentId.getOrElse(segmentId, -1) + 1
     val index: Int = indexBySegmentId(segmentId)
-    val file = new File(s"$workingDirectory/$outputFolderName/segment_${segmentId}_${index}_$dateStr.txt")
+    val file = new File(s"$workingDirectory/$outputFolderName/segment_${segmentId}_${dateStr}_${index}.txt")
     val parent = file.getParentFile
     parent.mkdirs()
     file.createNewFile()

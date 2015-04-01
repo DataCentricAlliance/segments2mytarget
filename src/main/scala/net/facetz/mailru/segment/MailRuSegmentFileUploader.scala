@@ -29,8 +29,7 @@ trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvi
     for {(segmentId, files) <- filesBySegmentId} {
       files.zipWithIndex.foreach {
         case (file, index) =>
-          val name = s"segment_${segmentId}_${dateStr}_$index"
-          uploadSegmentFileWithRetry(token, file, name)
+          uploadSegmentFileWithRetry(token, file, file.getName)
       }
     }
   }
