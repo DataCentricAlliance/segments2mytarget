@@ -1,4 +1,4 @@
-mailru segment exporter
+# Mailru segment exporter
 
 
 ## For make executable jar:
