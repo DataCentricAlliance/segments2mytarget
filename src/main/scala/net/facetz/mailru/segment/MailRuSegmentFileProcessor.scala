@@ -59,22 +59,26 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   }
 
   protected def processSourceFiles(filesToProcess: Iterator[Path]): Unit = {
-    filesToProcess.foreach(p => {
-      log.info(s"process : $p")
-      getSourceByPath(p).getLines().foreach(line => {
-        // oNGb1XM2TjCeZyK2GH8Y8A\t1975:1.0;1943:1.0
-        val Array(uid, segmentIdsStr) = line.split('\t')
-        segmentIdsStr.split(';').foreach(segmentInfo => {
-          segmentInfo.split(":") match {
-            case Array(segmentIdStr, _) =>
-              val segmentId = segmentIdStr
-              appendMailRuSegmentUser(segmentId, uid)
-            case _ =>
-              log.error(s"segment id not resolved: $line")
-          }
+    if(filesToProcess.isEmpty) {
+      log.error("source files not found")
+    } else {
+      filesToProcess.foreach(p => {
+        log.info(s"process : $p")
+        getSourceByPath(p).getLines().foreach(line => {
+          // oNGb1XM2TjCeZyK2GH8Y8A\t1975:1.0;1943:1.0
+          val Array(uid, segmentIdsStr) = line.split('\t')
+          segmentIdsStr.split(';').foreach(segmentInfo => {
+            segmentInfo.split(":") match {
+              case Array(segmentIdStr, _) =>
+                val segmentId = segmentIdStr
+                appendMailRuSegmentUser(segmentId, uid)
+              case _ =>
+                log.error(s"segment id not resolved: $line")
+            }
+          })
         })
       })
-    })
+    }
   }
 
   protected def getSourceByPath(p: Path): Source = {

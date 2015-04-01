@@ -11,14 +11,18 @@ import scala.util.{Failure, Success}
 trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvider with SimpleLogger {
 
   override protected def process(filesBySegmentId: Map[String, Seq[File]]): Unit = {
-    log.info("file upload started...")
-    getAuthToken match {
-      case Some(token) =>
-        log.info("auth token - ok")
-        uploadSegmentFiles(token, filesBySegmentId)
-      case None => throw new IllegalArgumentException("can't get authToken")
+    if(filesBySegmentId.isEmpty) {
+      log.info("no files to upload")
+    } else {
+      log.info("file upload started...")
+      getAuthToken match {
+        case Some(token) =>
+          log.info("auth token - ok")
+          uploadSegmentFiles(token, filesBySegmentId)
+        case None => throw new IllegalArgumentException("can't get authToken")
+      }
+      log.info("file upload finished!")
     }
-    log.info("file upload finished!")
   }
 
   protected def uploadSegmentFiles(token: String, filesBySegmentId: Map[String, Seq[File]]): Unit = {

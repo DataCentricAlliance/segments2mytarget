@@ -5,16 +5,21 @@ trait SimpleLogger {
 }
 
 class Log {
-  def info(msg: String): Unit = {
+
+  def log(msg: String): Unit = {
     println(msg)
   }
 
+  def info(msg: String): Unit = {
+    log(s"INFO: $msg")
+  }
+
   def error(msg: String): Unit = {
-    sys.error(msg)
+    log(s"ERROR: $msg")
   }
 
   def error(msg: String, t: Throwable): Unit = {
-    sys.error(msg)
+    error(msg)
     t.printStackTrace()
   }
 

@@ -8,7 +8,7 @@ object Runner {
   val today = new SimpleDateFormat("yyyyMMdd").format(new Date())
 
   case class Config(workingDirectory: String = "",
-                    partnerPrefix: String = "",
+                    partnerId: String = "",
                     outputFolderName: String = "results",
                     dateStr: String = today,
                     regexp: String = ".*[.gz]",
@@ -27,9 +27,9 @@ object Runner {
         .action({ (value, config) => config.copy(workingDirectory = value)})
         .text("Directory with files to process. ex. /opt/segments")
         .required()
-      opt[String]('p', "prefix")
-        .valueName("<prefix>")
-        .action({ (value, config) => config.copy(partnerPrefix = value)})
+      opt[String]('p', "partner")
+        .valueName("<partner>")
+        .action({ (value, config) => config.copy(partnerId = value)})
         .text("mailru partner prefix, will be first line of each processed file")
         .required()
       opt[String]('o', "outputname")
@@ -43,7 +43,7 @@ object Runner {
       opt[String]('r', "regexp")
         .valueName("<regexp>")
         .action({ (value, config) => config.copy(regexp = value)})
-        .text("source filename pattern in workdir, ex.    .*[.gz]")
+        .text("source filename pattern in workdir, default .*(.gz)$")
 
       opt[Unit]('u', "upload")
         .valueName("<upload>")

@@ -19,7 +19,7 @@ object MailRuExport extends SimpleLogger {
 
     override protected def filenamePatter: String = config.regexp
 
-    override protected def mailRuPartnerPrefix: String = config.partnerPrefix
+    override protected def mailRuPartnerPrefix: String = config.partnerId
   }
 
   class Exporter extends MailRuSegmentFileProcessor with MailRuSegmentFileConfigProvider
