@@ -1,0 +1,49 @@
+package net.facetz.export.mr.mailru.segment
+
+import java.io.File
+
+import mailru.helper.SimpleLogger
+import net.facetz.export.mr.mailru.api._
+
+import scala.annotation.tailrec
+import scala.util.{Failure, Success}
+
+trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvider with SimpleLogger {
+
+  override protected def process(filesBySegmentId: Map[String, Seq[File]]): Unit = {
+    log.info("file upload started...")
+    getAuthToken match {
+      case Some(token) =>
+        log.info("auth token - ok")
+        uploadSegmentFiles(token, filesBySegmentId)
+      case None => throw new IllegalArgumentException("can't get authToken")
+    }
+    log.info("file upload finished!")
+  }
+
+  protected def uploadSegmentFiles(token: String, filesBySegmentId: Map[String, Seq[File]]): Unit = {
+    for {(segmentId, files) <- filesBySegmentId} {
+      files.zipWithIndex.foreach {
+        case (file, index) =>
+          val name = s"segment_${segmentId}_${dateStr}_$index"
+          uploadSegmentFileWithRetry(token, file, name)
+      }
+    }
+  }
+
+  @tailrec
+  private def uploadSegmentFileWithRetry(token: String, file: File, name: String): Unit = {
+    log.info(s"Try to upload ${file.getPath}")
+    uploadSegmentFile(token, file, name) match {
+      case Success(x) if x.isRight =>
+        log.info(s"Uploaded ${file.getPath}")
+      case Success(x) if x.isLeft =>
+        log.info(s"limit for ${file.getPath}. Waiting...")
+        Thread.sleep(2 * 60 * 1000)
+        uploadSegmentFileWithRetry(token, file, name)
+      case Failure(f) =>
+        log.error(s"can't upload file ${file.getPath}", f)
+    }
+  }
+
+}
