@@ -29,12 +29,10 @@ object Runner {
         .valueName("<workdir>")
         .action({ (value, config) => config.copy(workingDirectory = value)})
         .text("Directory with files to process. ex. /opt/segments")
-        .required()
       opt[String]('p', "partner")
         .valueName("<partner>")
         .action({ (value, config) => config.copy(partnerId = value)})
         .text("mailru partner prefix, will be first line of each processed file")
-        .required()
       opt[String]('o', "outputname")
         .valueName("<outputname>")
         .action({ (value, config) => config.copy(outputFolderName = value)})
@@ -78,7 +76,9 @@ object Runner {
           failure("only one mode accepted: upload or auditoryupdate")
         } else if (c.upload && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
           failure("you want to upload but not set clientId or clientSecret")
-        } else if (! c.upload && (!c.clientId.isEmpty  || c.clientSecret.isEmpty )) {
+        } else if (! c.auditoryUpdate && (c.workingDirectory.isEmpty || c.partnerId.isEmpty)) {
+          failure("you want process file but not set workingDirectory or partnerId")
+        } else if (! c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty  || c.clientSecret.isEmpty )) {
           println("you set clientId or clientSecret but not set -u option, files will not be uploaded")
           success
         } else {
