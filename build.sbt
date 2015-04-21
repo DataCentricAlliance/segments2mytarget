@@ -4,7 +4,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.4-SNAPSHOT"
+version := "1.4.1-SNAPSHOT"
 
 
 organization := "net.facetz"
