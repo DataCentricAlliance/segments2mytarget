@@ -1,22 +1,34 @@
 # Mailru segment exporter
 
 ## Requirements
-- sbt 0.13.7
+- sbt 0.13.8
 
 ## For make executable jar:
 ```bash
-sbt assembly
+sbt clean assembly
+```
+
+## For publish jar to Nexus repository:
+Create file with Nexus credentials ~/.sbt/.credentials
+
+```
+realm=Sonatype Nexus Repository Manager
+host=repo
+user=username
+password=password
+```
+
+And run command
+
+```bash
+sbt clean publish
 ```
 
 ## Launch
-### Full params
-```bash
-java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar --workdir /tmp/gz --outputname export-results --date 20150330 --regexp ".*(.gz)$" --partner pr --upload --client someclient --secret somesecret
-```
 
-### Simple with defaults
+## Show help message:
 ```bash
-java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar -i /tmp/gz -p dl -u -c someclient -s somesecret
+java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
 ```
 
 ## Available options
@@ -43,7 +55,12 @@ java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar -i /tmp/gz 
             your mailru client_secret
 ```
 
-## Show help message:
+### Full params
 ```bash
-java -jar target/scala-2.11/mailru-segment-exporter-assembly-1.0.jar --help
+java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --workdir /tmp/gz --outputname export-results --date 20150330 --regexp ".*(.gz)$" --partner pr --upload --client someclient --secret somesecret
+```
+
+### Simple with defaults
+```bash
+java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar -i /tmp/gz -p dl -u -c someclient -s somesecret
 ```
