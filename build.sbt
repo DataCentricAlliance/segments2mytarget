@@ -4,7 +4,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.4.1-SNAPSHOT"
+version := "1.4.2-SNAPSHOT"
 
 
 organization := "net.facetz"
@@ -26,3 +26,4 @@ libraryDependencies ++= Seq(
 mainClass in assembly := Some("net.facetz.mailru.Runner")
 
 assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = true)
