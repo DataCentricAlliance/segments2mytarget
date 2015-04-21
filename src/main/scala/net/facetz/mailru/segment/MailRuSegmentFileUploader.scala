@@ -28,8 +28,7 @@ trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvi
   protected def uploadSegmentFiles(token: String, filesBySegmentId: Map[String, Seq[File]]): Unit = {
     for {(segmentId, files) <- filesBySegmentId} {
       files.zipWithIndex.foreach {
-        case (file, index) =>
-          uploadSegmentFileWithRetry(token, file, file.getName)
+        case (file, index) => uploadSegmentFileWithRetry(token, file, file.getName)
       }
     }
   }

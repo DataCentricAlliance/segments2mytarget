@@ -44,6 +44,18 @@ object CreateRemarketingAuditoryRequest {
 }
 
 
+case class UpdateRemarketingAuditoryRequest(id: Int,
+                                            name: String,
+                                            disjunctions: List[DisjunctionsItem])
+
+object UpdateRemarketingAuditoryRequest {
+  implicit def RemarketingAuditoryRequestEncodeJson: EncodeJson[UpdateRemarketingAuditoryRequest] =
+    jencode3L((r: UpdateRemarketingAuditoryRequest) => (r.id, r.name, r.disjunctions))("id", "name", "disjunctions")
+}
+
+
+
+
 //[{"campaigns": [], "disjunctions": [{"remarketing_users_lists": [{"remarketing_users_list_id": 26717, "type": "positive"}], "remarketing_groups": [], "remarketing_game_players": [], "remarketing_payers": [], "remarketing_context_phrases": [], "remarketing_counters": [], "remarketing_mobile_apps": [], "remarketing_game_payers": [], "remarketing_pricelists": [], "remarketing_players": []}], "flags": ["cross_device"], "id": 43851, "name": "auditory_947"}]
 case class RemarketingAuditoryItem(id: Int,
                                    name: String,

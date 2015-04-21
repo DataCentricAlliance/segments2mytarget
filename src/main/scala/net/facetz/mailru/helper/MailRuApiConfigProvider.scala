@@ -8,8 +8,9 @@ trait MailRuApiConfigProvider {
 
   private val config = ConfigHolder.config
 
-
   override protected val apiUrl  = config.apiUrl
   override protected val clientId = config.clientId
   override protected val clientSecret = config.clientSecret
+  override protected val subAccountName = config.subAccountName
+
 }

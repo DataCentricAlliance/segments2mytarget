@@ -17,6 +17,15 @@ trait MailRuApiProvider extends SimpleLogger {
 
   protected def clientSecret: String
 
+  protected def subAccountName: Option[String]
+
+  def clientApiUrl = {
+    subAccountName match {
+      case Some(name) => s"$apiUrl/users/$name"
+      case None => apiUrl
+    }
+  }
+
   private[this] val defaultConnectionTimeout = 30 * 1000
   private[this] val defaultReadTimeout = 30 * 1000
 
@@ -33,7 +42,7 @@ trait MailRuApiProvider extends SimpleLogger {
   protected def auth(req: HttpRequest, token: String) = req.header("Authorization", s"Bearer $token")
 
   protected def getAuthToken: Option[String] = {
-    val response: HttpResponse[String] = Http(s"$apiUrl/api/v2/oauth2/token.json")
+    val response = Http(s"$apiUrl/api/v2/oauth2/token.json")
       .headers("Content-Type" -> "application/x-www-form-urlencoded")
       .params("grant_type" -> "client_credentials", "client_id" -> clientId, "client_secret" -> clientSecret)
       .setTimeouts()
@@ -52,7 +61,7 @@ trait MailRuApiProvider extends SimpleLogger {
   }
 
   protected def getRemarketingUsersList(authToken: String): Option[List[RemarketingUserListResponseItem]] = {
-    val findUserListsResponse: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketing_users_lists.json")
+    val findUserListsResponse = Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
       .addAuthToken(authToken)
       .setTimeouts()
       .asString
@@ -65,7 +74,7 @@ trait MailRuApiProvider extends SimpleLogger {
   }
 
   protected def getRemarketingAuditories(authToken: String): Option[List[RemarketingAuditoryItem]] = {
-    val existedRemarketings: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketings.json")
+    val existedRemarketings = Http(s"$clientApiUrl/api/v1/remarketings.json")
       .addAuthToken(authToken)
       .setTimeouts()
       .asString
@@ -74,7 +83,7 @@ trait MailRuApiProvider extends SimpleLogger {
   }
 
   protected def createRemarketingAuditory(authToken: String, request: CreateRemarketingAuditoryRequest): Option[String] = {
-    val createResponse: HttpResponse[String] = Http(s"$apiUrl/api/v1/remarketings.json")
+    val createResponse = Http(s"$clientApiUrl/api/v1/remarketings.json")
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
       .setTimeouts()
@@ -87,16 +96,31 @@ trait MailRuApiProvider extends SimpleLogger {
     }
   }
 
+  protected def updateRemarketingAuditory(authToken: String, request: UpdateRemarketingAuditoryRequest): Option[String] = {
+    val updateResponse = Http(s"$clientApiUrl/api/v1/remarketings/${request.id}.json")
+      .postData(request.asJson.toString())
+      .addAuthToken(authToken)
+      .setTimeouts()
+      .asString
+
+    if (updateResponse.isSuccess) {
+      Option(updateResponse.body)
+    } else {
+      None
+    }
+  }
+
+
+
   protected def uploadSegmentFile(authToken: String, file: File, name: String): Try[Either[OverTheLimitResponse,
     RemarketingUserListResponseItem]] = {
     Try {
-      val is: FileInputStream = new FileInputStream(file)
+      val is = new FileInputStream(file)
 
-      val result: Either[OverTheLimitResponse, RemarketingUserListResponseItem] = {
-        try {
+      val result = try {
           val array: Array[Byte] = IOUtils.toByteArray(is)
           val result: HttpResponse[String] =
-            Http(s"$apiUrl/api/v1/remarketing_users_lists.json")
+            Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
               .addAuthToken(authToken)
               .setTimeouts()
               .postMulti(
@@ -114,13 +138,12 @@ trait MailRuApiProvider extends SimpleLogger {
             log.error(result.body)
             throw new RuntimeException("bad response")
           }
-        } catch {
-          case t: IOException if "Premature EOF".equals(t.getMessage) => Left(null)
-        } finally {
-          is.close()
-        }
+      } catch {
+        case t: IOException if "Premature EOF".equals(t.getMessage) => Left(null)
+      } finally {
+        is.close()
       }
-      result
+    result
     }
   }
 

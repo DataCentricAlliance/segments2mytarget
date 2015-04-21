@@ -1,7 +1,10 @@
 package net.facetz.mailru
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
+import net.facetz.mailru.auditory.MailRuAuditoryUpdater
 import net.facetz.mailru.helper.{MailRuApiConfigProvider, SimpleLogger}
 import net.facetz.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader}
 
@@ -29,14 +32,21 @@ object MailRuExport extends SimpleLogger {
     override protected def process(fileBySegmentId: Map[String, Seq[File]]): Unit = {}
   }
 
+  val auditoryUpdater = new MailRuAuditoryUpdater with MailRuApiConfigProvider {
+    override protected val dateStr = ConfigHolder.config.dateStr
+  }
 
   def run: Unit = {
     log.info("mailRuExporter running...")
 
-    if(ConfigHolder.config.upload) {
-      new Exporter().startProcessing()
+    if(ConfigHolder.config.auditoryUpdate) {
+      auditoryUpdater.run()
     } else {
-      new FilesTransformer().startProcessing()
+      if(ConfigHolder.config.upload) {
+        new Exporter().startProcessing()
+      } else {
+        new FilesTransformer().startProcessing()
+      }
     }
 
     log.info("mailRuExporter finished!")
