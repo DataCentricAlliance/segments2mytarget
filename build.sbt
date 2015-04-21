@@ -2,7 +2,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.2"
+version := "1.3"
 
 
 organization := "net.facetz"

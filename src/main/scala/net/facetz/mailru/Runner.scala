@@ -13,9 +13,11 @@ object Runner {
                     dateStr: String = today,
                     regexp: String = ".*[.gz]",
                     upload: Boolean = false,
+                    auditoryUpdate: Boolean = false,
                     apiUrl: String = "https://target.my.com",
                     clientId: String = "",
-                    clientSecret: String = ""
+                    clientSecret: String = "",
+                    subAccountName: Option[String] = None
                      )
 
   //args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -50,6 +52,10 @@ object Runner {
         .valueName("<upload>")
         .action({ (_, config) => config.copy(upload = true)})
         .text("upload segments to mailru or not. false by default")
+      opt[Unit]('y', "auditoryupdate")
+        .valueName("<auditoryupdate>")
+        .action({ (_, config) => config.copy(auditoryUpdate = true)})
+        .text("update auditories in mailru or not. false by default")
       opt[Unit]('a', "apiurl")
         .valueName("<apiurl>")
         .action({ (_, config) => config.copy(upload = true)})
@@ -62,15 +68,22 @@ object Runner {
         .valueName("<secret>")
         .action({ (value, config) => config.copy(clientSecret = value)})
         .text("your mailru client_secret")
+      opt[String]('m', "minion")
+        .valueName("<minion>")
+        .action({ (value, config) => config.copy(subAccountName = Some(value))})
+        .text("subaccount name for agencies")
 
-      checkConfig(c => if (c.upload && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
-        failure("you want to upload but not set clientId or clientSecret")
-      } else if (! c.upload && (!c.clientId.isEmpty  || c.clientSecret.isEmpty )) {
-        println("you set clientId or clientSecret but not set -u option, files will not be uploaded")
-        success
-      } else {
-        success
-      })
+      checkConfig(c =>
+        if(c.upload && c.auditoryUpdate) {
+          failure("only one mode accepted: upload or auditoryupdate")
+        } else if (c.upload && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
+          failure("you want to upload but not set clientId or clientSecret")
+        } else if (! c.upload && (!c.clientId.isEmpty  || c.clientSecret.isEmpty )) {
+          println("you set clientId or clientSecret but not set -u option, files will not be uploaded")
+          success
+        } else {
+          success
+        })
     }
 
     parser.parse(args, Config()) match {
