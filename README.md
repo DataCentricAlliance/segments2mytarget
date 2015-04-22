@@ -1,37 +1,28 @@
-# Mailru segment exporter
+# FACETz DMP segments uploader to myTarget
+FACETz DMP publishes files with user segments to its SFTP server. 
+
+This module knows how to create Audiences at your myTarget account using these files.
+
+For each FACETz segment_id will be created Audience in myTarget with same id (ex. all users in FACETz segment with id 123 will be uploaded to myTarget Audience with name facetz_auditory_123)
 
 ## Requirements
-- sbt 0.13.8
+JDK 7+ (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
-## For make executable jar:
+sbt 0.13.8 (http://www.scala-sbt.org/download.html)
+
+## Launch
+
+### Making executable jar
 ```bash
 sbt clean assembly
 ```
 
-## For publish jar to Nexus repository:
-Create file with Nexus credentials ~/.sbt/.credentials
-
-```
-realm=Sonatype Nexus Repository Manager
-host=repo
-user=username
-password=password
-```
-
-And run command
-
-```bash
-sbt clean publish
-```
-
-## Launch
-
-## Show help message:
+### Show help message
 ```bash
 java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
 ```
 
-## Available options
+### Available options
 ```
    --help
          prints this usage text
@@ -74,4 +65,20 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --auditor
 ### Simple process and upload with defaults
 ```bash
 java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar -i /tmp/gz -p dl -u -c someclient -s somesecret
+```
+
+## Publishing jar to FACETz Nexus repository
+Create file with Nexus credentials ~/.sbt/.credentials
+
+```
+realm=Sonatype Nexus Repository Manager
+host=repo
+user=username
+password=password
+```
+
+And run command
+
+```bash
+sbt clean publish
 ```

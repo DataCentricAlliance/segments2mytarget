@@ -1,7 +1,7 @@
 package net.facetz.mailru.auditory
 
-import net.facetz.mailru.helper.SimpleLogger
 import net.facetz.mailru.api._
+import net.facetz.mailru.helper.SimpleLogger
 import org.apache.commons.lang3.StringUtils
 
 import scala.collection.mutable
@@ -19,7 +19,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
     getAuthToken match {
       case Some(token) =>
         ourSegmentIdToTheirIds = findOurSegmentIdToTheirSegmentIds(token)
-        if(ourSegmentIdToTheirIds.nonEmpty) {
+        if (ourSegmentIdToTheirIds.nonEmpty) {
           updateRetargetingAuditory(token, ourSegmentIdToTheirIds.keys)
         } else {
           log.info("nothing to update")
@@ -31,7 +31,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   }
 
   protected def findOurSegmentIdToTheirSegmentIds(authToken: String): mutable.MultiMap[String, Int] = {
-    val regex = s"(.*segment_.*${dateStr}.*)".r
+    val regex = s"(.*segment_.*$dateStr.*)".r
     val optResponse = getRemarketingUsersList(authToken)
     val response = optResponse match {
       case Some(r) => r
@@ -73,7 +73,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
       (ourSegmentIdForCreate.toString, result)
     })
 
-    for((name, disjunctionsItems) <- namesWithUserListItems) {
+    for {(name, disjunctionsItems) <- namesWithUserListItems} {
       val newAuditoryName = segmentToName(name)
       val request = CreateRemarketingAuditoryRequest(newAuditoryName, disjunctionsItems.toList)
       createRemarketingAuditory(token, request) match {
@@ -84,14 +84,14 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   }
 
   protected def updateOldAuditories(token: String,
-                          existedAuditoryById: Map[Int, RemarketingAuditoryItem],
-                          existedAuditoryByOurSegmentId: Map[String, Int],
-                          existedExtSegmentByExtAuditory: mutable.MultiMap[Int, Int]): Unit = {
+                                    existedAuditoryById: Map[Int, RemarketingAuditoryItem],
+                                    existedAuditoryByOurSegmentId: Map[String, Int],
+                                    existedExtSegmentByExtAuditory: mutable.MultiMap[Int, Int]): Unit = {
     val newExtSegmentsByExtAuditory = existedAuditoryByOurSegmentId.map({
       case (ourSegmentId, auditoryId) => (auditoryId, ourSegmentIdToTheirIds.getOrElse(ourSegmentId, Set.empty[Int]))
     })
 
-    for((auditoryId, segments) <- existedExtSegmentByExtAuditory) {
+    for {(auditoryId, segments) <- existedExtSegmentByExtAuditory} {
       val newSegments = newExtSegmentsByExtAuditory.getOrElse(auditoryId, Set.empty[Int])
       if (newSegments.nonEmpty) {
         val resultSegments = segments.union(newSegments)
@@ -112,21 +112,22 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
 
   private[this] def segmentIdToDisjunctionItem(id: Int) = DisjunctionsItem(List(RemarketingUserListItem(id)))
 
-  private[this] def findLocalExternalMatchings(remarketingsAuditories: List[RemarketingAuditoryItem]) : (Map[String, Int], mutable.MultiMap[Int, Int]) = {
+  private[this] def findLocalExternalMatchings(remarketingsAuditories: List[RemarketingAuditoryItem]):
+  (Map[String, Int], mutable.MultiMap[Int, Int]) = {
 
-    val extSegmentByExtAuditory: mutable.MultiMap[Int, Int] = new mutable.HashMap[Int, mutable.Set[Int]] with mutable.MultiMap[Int, Int]
-    val extAuditoryByOurSegmentId: mutable.Map[String, Int] = new mutable.HashMap[String, Int]
+    val extSegmentByExtAuditory = new mutable.HashMap[Int, mutable.Set[Int]] with mutable.MultiMap[Int, Int]
+    val extAuditoryByOurSegmentId = new mutable.HashMap[String, Int]
 
     remarketingsAuditories.foreach(auditory => {
       auditory.disjunctions
         .flatMap(_.remarketingUsersLists.map(_.remarketingUsersListId).toSeq)
         .foreach(extSegmentId => {
-          extSegmentByExtAuditory.addBinding(auditory.id, extSegmentId)
-          val ourSegmentId = StringUtils.substringAfterLast(auditory.name, "_")
-          if(StringUtils.isNoneEmpty(ourSegmentId)) {
-            extAuditoryByOurSegmentId(ourSegmentId) = auditory.id
-          }
-        })
+        extSegmentByExtAuditory.addBinding(auditory.id, extSegmentId)
+        val ourSegmentId = StringUtils.substringAfterLast(auditory.name, "_")
+        if (StringUtils.isNoneEmpty(ourSegmentId)) {
+          extAuditoryByOurSegmentId(ourSegmentId) = auditory.id
+        }
+      })
     })
     (extAuditoryByOurSegmentId.toMap, extSegmentByExtAuditory)
   }

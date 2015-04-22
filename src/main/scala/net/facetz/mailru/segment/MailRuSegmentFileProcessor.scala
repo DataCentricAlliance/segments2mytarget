@@ -58,7 +58,7 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   }
 
   protected def processSourceFiles(filesToProcess: Iterator[Path]): Unit = {
-    if(filesToProcess.isEmpty) {
+    if (filesToProcess.isEmpty) {
       log.error("source files not found")
     } else {
       filesToProcess.foreach(p => {
@@ -114,7 +114,7 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   protected def addWriter(segmentId: String): (BufferedWriter, File) = {
     indexBySegmentId(segmentId) = indexBySegmentId.getOrElse(segmentId, -1) + 1
     val index: Int = indexBySegmentId(segmentId)
-    val file = new File(s"$workingDirectory/$outputFolderName/facetz-segment_${segmentId}_${dateStr}_${index}.txt")
+    val file = new File(s"$workingDirectory/$outputFolderName/facetz-segment_${segmentId}_${dateStr}_$index.txt")
     val parent = file.getParentFile
     parent.mkdirs()
     file.createNewFile()

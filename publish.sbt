@@ -2,10 +2,11 @@ publishMavenStyle := true
 
 publishTo := {
   val nexus = "http://repo:8081/nexus/"
-  if (isSnapshot.value)
+  if (isSnapshot.value) {
     Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
+  } else {
     Some("releases" at nexus + "content/repositories/thirdparty")
+  }
 }
 
 /**

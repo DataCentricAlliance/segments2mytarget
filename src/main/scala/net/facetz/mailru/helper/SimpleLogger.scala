@@ -22,6 +22,4 @@ class Log {
     error(msg)
     t.printStackTrace()
   }
-
-
 }
