@@ -65,7 +65,7 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
 java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --workdir /tmp/gz --outputname export-results --date 20150330 --regexp ".*(.gz)$" --partner pr --upload --client someclient --secret somesecret
 ```
 
-### Full params for segments update
+### Full params for auditory update
 ```bash
 java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --auditoryupdate --client someclient --secret somesecret --minion 6minion048@agency_client
 ```
