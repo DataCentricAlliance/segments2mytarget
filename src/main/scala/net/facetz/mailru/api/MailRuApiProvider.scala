@@ -135,7 +135,7 @@ trait MailRuApiProvider extends SimpleLogger {
           } else if (overLimitValidation.isSuccess) {
             Left(overLimitValidation.getOrElse(null))
           } else {
-            log.error(result.body)
+            log.error(s"${result.statusLine}-${result.body}")
             throw new RuntimeException("bad response")
           }
       } catch {

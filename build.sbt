@@ -4,7 +4,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.3-SNAPSHOT"
+version := "1.4.5-SNAPSHOT"
 
 
 organization := "net.facetz"
@@ -26,3 +26,10 @@ libraryDependencies ++= Seq(
 mainClass in assembly := Some("net.facetz.mailru.Runner")
 
 assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+
+artifact in (Compile, assembly) := {
+  val art = (artifact in (Compile, assembly)).value
+  art.copy(`classifier` = Some("assembly"))
+}
+
+addArtifact(artifact in (Compile, assembly), assembly)

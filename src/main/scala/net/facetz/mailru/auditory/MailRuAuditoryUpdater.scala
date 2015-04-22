@@ -13,6 +13,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   private[this] var ourSegmentIdToTheirIds: mutable.MultiMap[String, Int] = null
 
   def run(): Unit = {
+    log.info(s"use date: $dateStr")
     log.info("auditory update started..")
 
     getAuthToken match {
