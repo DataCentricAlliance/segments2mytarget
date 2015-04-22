@@ -2,8 +2,8 @@ package net.facetz.mailru.segment
 
 import java.io.File
 
-import net.facetz.mailru.helper.SimpleLogger
 import net.facetz.mailru.api._
+import net.facetz.mailru.helper.SimpleLogger
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success}
@@ -11,7 +11,7 @@ import scala.util.{Failure, Success}
 trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvider with SimpleLogger {
 
   override protected def process(filesBySegmentId: Map[String, Seq[File]]): Unit = {
-    if(filesBySegmentId.isEmpty) {
+    if (filesBySegmentId.isEmpty) {
       log.info("no files to upload")
     } else {
       log.info("file upload started...")

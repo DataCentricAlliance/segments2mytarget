@@ -4,7 +4,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.4.6-SNAPSHOT"
+version := "1.4.7-SNAPSHOT"
 
 
 organization := "net.facetz"
@@ -27,9 +27,16 @@ mainClass in assembly := Some("net.facetz.mailru.Runner")
 
 assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
 
-artifact in (Compile, assembly) := {
-  val art = (artifact in (Compile, assembly)).value
+artifact in(Compile, assembly) := {
+  val art = (artifact in(Compile, assembly)).value
   art.copy(`classifier` = Some("assembly"))
 }
 
-addArtifact(artifact in (Compile, assembly), assembly)
+addArtifact(artifact in(Compile, assembly), assembly).settings
+
+// compile task depends on scalastyle
+lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+
+compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value
+
+(compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle

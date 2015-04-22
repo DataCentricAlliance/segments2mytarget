@@ -54,9 +54,11 @@ object UpdateRemarketingAuditoryRequest {
 }
 
 
-
-
-//[{"campaigns": [], "disjunctions": [{"remarketing_users_lists": [{"remarketing_users_list_id": 26717, "type": "positive"}], "remarketing_groups": [], "remarketing_game_players": [], "remarketing_payers": [], "remarketing_context_phrases": [], "remarketing_counters": [], "remarketing_mobile_apps": [], "remarketing_game_payers": [], "remarketing_pricelists": [], "remarketing_players": []}], "flags": ["cross_device"], "id": 43851, "name": "auditory_947"}]
+// [{"campaigns": [], "disjunctions": [{"remarketing_users_lists":
+// [{"remarketing_users_list_id": 26717, "type": "positive"}], "remarketing_groups": [], "remarketing_game_players": [],
+// "remarketing_payers": [], "remarketing_context_phrases": [], "remarketing_counters": [],
+// "remarketing_mobile_apps": [], "remarketing_game_payers": [], "remarketing_pricelists": [],
+// "remarketing_players": []}], "flags": ["cross_device"], "id": 43851, "name": "auditory_947"}]
 case class RemarketingAuditoryItem(id: Int,
                                    name: String,
                                    disjunctions: List[DisjunctionsItem])
@@ -68,7 +70,7 @@ object RemarketingAuditoryItem {
   )("id", "name", "disjunctions")
 }
 
-//{"status": "loading", "users_count": 0, "type": "dmp_id", "id": 26717, "name": "segment_947_20150304_1"}
+// {"status": "loading", "users_count": 0, "type": "dmp_id", "id": 26717, "name": "segment_947_20150304_1"}
 case class RemarketingUserListResponseItem(id: Int,
                                            name: String,
                                            status: String,
@@ -83,7 +85,7 @@ object RemarketingUserListResponseItem {
   )("id", "name", "status", "users_count", "type")
 }
 
-//{"remaining": {"3600": 0}, "limits": {"3600": 3}}
+// {"remaining": {"3600": 0}, "limits": {"3600": 3}}
 case class LimitItem(`3600`: Int)
 
 object LimitItem {

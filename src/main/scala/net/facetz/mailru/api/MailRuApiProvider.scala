@@ -19,12 +19,11 @@ trait MailRuApiProvider extends SimpleLogger {
 
   protected def subAccountName: Option[String]
 
-  def clientApiUrl = {
+  def clientApiUrl: String =
     subAccountName match {
       case Some(name) => s"$apiUrl/users/$name"
       case None => apiUrl
     }
-  }
 
   private[this] val defaultConnectionTimeout = 30 * 1000
   private[this] val defaultReadTimeout = 30 * 1000
@@ -82,7 +81,8 @@ trait MailRuApiProvider extends SimpleLogger {
     existedRemarketings.body.decodeOption[List[RemarketingAuditoryItem]]
   }
 
-  protected def createRemarketingAuditory(authToken: String, request: CreateRemarketingAuditoryRequest): Option[String] = {
+  protected def createRemarketingAuditory(authToken: String,
+                                          request: CreateRemarketingAuditoryRequest): Option[String] = {
     val createResponse = Http(s"$clientApiUrl/api/v1/remarketings.json")
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
@@ -96,7 +96,8 @@ trait MailRuApiProvider extends SimpleLogger {
     }
   }
 
-  protected def updateRemarketingAuditory(authToken: String, request: UpdateRemarketingAuditoryRequest): Option[String] = {
+  protected def updateRemarketingAuditory(authToken: String,
+                                          request: UpdateRemarketingAuditoryRequest): Option[String] = {
     val updateResponse = Http(s"$clientApiUrl/api/v1/remarketings/${request.id}.json")
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
@@ -111,39 +112,38 @@ trait MailRuApiProvider extends SimpleLogger {
   }
 
 
-
   protected def uploadSegmentFile(authToken: String, file: File, name: String): Try[Either[OverTheLimitResponse,
     RemarketingUserListResponseItem]] = {
     Try {
       val is = new FileInputStream(file)
 
       val result = try {
-          val array: Array[Byte] = IOUtils.toByteArray(is)
-          val result: HttpResponse[String] =
-            Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
-              .addAuthToken(authToken)
-              .setTimeouts()
-              .postMulti(
-                MultiPart("file", name, "application/text", array),
-                MultiPart("name", "", "", name),
-                MultiPart("type", "", "", "dmp_id"))
-              .asString
-          val overLimitValidation = result.body.decodeValidation[OverTheLimitResponse]
-          val goodItemValidation = result.body.decodeValidation[RemarketingUserListResponseItem]
-          if (goodItemValidation.isSuccess) {
-            Right(goodItemValidation.getOrElse(null))
-          } else if (overLimitValidation.isSuccess) {
-            Left(overLimitValidation.getOrElse(null))
-          } else {
-            log.error(s"${result.statusLine}-${result.body}")
-            throw new RuntimeException("bad response")
-          }
+        val array: Array[Byte] = IOUtils.toByteArray(is)
+        val result: HttpResponse[String] =
+          Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
+            .addAuthToken(authToken)
+            .setTimeouts()
+            .postMulti(
+              MultiPart("file", name, "application/text", array),
+              MultiPart("name", "", "", name),
+              MultiPart("type", "", "", "dmp_id"))
+            .asString
+        val overLimitValidation = result.body.decodeValidation[OverTheLimitResponse]
+        val goodItemValidation = result.body.decodeValidation[RemarketingUserListResponseItem]
+        if (goodItemValidation.isSuccess) {
+          Right(goodItemValidation.getOrElse(null))
+        } else if (overLimitValidation.isSuccess) {
+          Left(overLimitValidation.getOrElse(null))
+        } else {
+          log.error(s"${result.statusLine}-${result.body}")
+          throw new RuntimeException("bad response")
+        }
       } catch {
         case t: IOException if "Premature EOF".equals(t.getMessage) => Left(null)
       } finally {
         is.close()
       }
-    result
+      result
     }
   }
 
