@@ -31,7 +31,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   }
 
   protected def findOurSegmentIdToTheirSegmentIds(authToken: String): mutable.MultiMap[String, Int] = {
-    val regex = s"(segment_.*${dateStr}.*)".r
+    val regex = s"(.*segment_.*${dateStr}.*)".r
     val optResponse = getRemarketingUsersList(authToken)
     val response = optResponse match {
       case Some(r) => r
@@ -108,7 +108,7 @@ trait MailRuAuditoryUpdater extends MailRuApiProvider with SimpleLogger {
   }
 
 
-  private[this] def segmentToName(segmentId: String) = s"Auditory_$segmentId"
+  private[this] def segmentToName(segmentId: String) = s"facetz-auditory_$segmentId"
 
   private[this] def segmentIdToDisjunctionItem(id: Int) = DisjunctionsItem(List(RemarketingUserListItem(id)))
 
