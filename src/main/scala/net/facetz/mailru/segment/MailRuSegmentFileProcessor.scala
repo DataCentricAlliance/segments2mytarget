@@ -21,7 +21,6 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   protected def mailRuPartnerPrefix: String
 
 
-
   protected val maxThreshold = 5000000
   protected val minThreshold = 5000
 
@@ -72,8 +71,7 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
               case Array(segmentIdStr, _) =>
                 val segmentId = segmentIdStr
                 appendMailRuSegmentUser(segmentId, uid)
-              case _ =>
-                log.error(s"segment id not resolved: $line")
+              case _ => log.error(s"segment id not resolved: $line")
             }
           })
         })
@@ -116,7 +114,7 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
   protected def addWriter(segmentId: String): (BufferedWriter, File) = {
     indexBySegmentId(segmentId) = indexBySegmentId.getOrElse(segmentId, -1) + 1
     val index: Int = indexBySegmentId(segmentId)
-    val file = new File(s"$workingDirectory/$outputFolderName/segment_${segmentId}_${dateStr}_${index}.txt")
+    val file = new File(s"$workingDirectory/$outputFolderName/facetz-segment_${segmentId}_${dateStr}_${index}.txt")
     val parent = file.getParentFile
     parent.mkdirs()
     file.createNewFile()
