@@ -20,8 +20,9 @@ trait MailRuSegmentFileProcessor extends SegmentFileProcessor with SimpleLogger 
 
   protected def mailRuPartnerPrefix: String
 
+  protected def maxThreshold: Int
 
-  protected val maxThreshold = 5000000
+
   protected val minThreshold = 5000
 
   // [segmentId, (isFull, _, _)]

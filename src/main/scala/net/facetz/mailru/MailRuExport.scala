@@ -21,6 +21,8 @@ object MailRuExport extends SimpleLogger {
     override protected def filenamePatter: String = config.regexp
 
     override protected def mailRuPartnerPrefix: String = config.partnerId
+
+    override protected def maxThreshold: Int = config.maxThreshold
   }
 
   class Exporter extends SegmentFileProvider with MailRuSegmentFileUploader with MailRuApiConfigProvider {

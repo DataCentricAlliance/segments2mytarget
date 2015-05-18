@@ -19,7 +19,8 @@ object Runner extends App {
                     clientId: String = "",
                     clientSecret: String = "",
                     subAccountName: Option[String] = None,
-                    allowedSegments: Option[List[String]] = None
+                    allowedSegments: Option[List[String]] = None,
+                    maxThreshold: Int = 5000000
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -79,15 +80,22 @@ object Runner extends App {
       .valueName("<minion>")
       .action({ (value, config) => config.copy(subAccountName = Some(value)) })
       .text("subaccount name for agencies")
+    opt[Int]('t', "maxthreshold")
+      .valueName("<maxthreshold>")
+      .action({ (value, config) => config.copy(maxThreshold = value) })
+      .text("max segmentfile line count")
+
 
     checkConfig(c =>
       if ((c.process || c.upload) && c.auditoryUpdate) {
         failure("you can only (process or/and upload) or auditoryupdate")
       } else if ((c.upload || c.auditoryUpdate) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
         failure("you want to upload/auditoryupdate but not set clientId or clientSecret")
-      } else if (!c.auditoryUpdate && (c.workingDirectory.isEmpty || c.partnerId.isEmpty)) {
-        failure("you want process file but not set workingDirectory or partnerId")
-      } else if (!c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty || c.clientSecret.isEmpty)) {
+      } else if ((c.process || c.upload) && c.workingDirectory.isEmpty) {
+        failure("you want process or upload file but not set workdir")
+      } else if (c.process && c.partnerId.isEmpty) {
+        failure("you want process file but not set partner")
+      } else if (!c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty || !c.clientSecret.isEmpty)) {
         println("you set clientId or clientSecret but not set -u or -y option, files will not be uploaded")
         success
       } else {

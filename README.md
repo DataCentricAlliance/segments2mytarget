@@ -26,6 +26,8 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
 ```
    --help
            prints this usage text
+     -w | --process
+           process segments from files. false by default
      -i <workdir> | --workdir <workdir>
            Directory with files to process. ex. /opt/segments
      -p <partner> | --partner <partner>
@@ -36,8 +38,6 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
            suffix of segment file name. It will be used for auditory update in future. ex. 20151231, now by default
      -r <regexp> | --regexp <regexp>
            source filename pattern in workdir, default .*(.gz)$
-     -w | --process
-           process segments from files. false by default
      -g <allowedsegments> | --allowedsegments <allowedsegments>
            comma-separated allowed segment ids for upload . empty = all. empty by default
      -u | --upload
@@ -52,6 +52,8 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
            your mailru client_secret
      -m <minion> | --minion <minion>
            subaccount name for agencies
+     -t <maxthreshold> | --maxthreshold <maxthreshold>
+           max segmentfile line count
 
 ```
 
