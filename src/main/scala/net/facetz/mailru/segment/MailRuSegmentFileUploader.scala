@@ -14,7 +14,7 @@ trait MailRuSegmentFileUploader extends SegmentFileProcessor with MailRuApiProvi
     if (filesBySegmentId.isEmpty) {
       log.info("no files to upload")
     } else {
-      log.info("file upload started...")
+      log.info(s"file upload started for ${filesBySegmentId.size} segments...")
       getAuthToken match {
         case Some(token) =>
           log.info("auth token - ok")

@@ -7,9 +7,10 @@ object Runner extends App {
 
   val today = new SimpleDateFormat("yyyyMMdd").format(new Date())
 
-  case class Config(workingDirectory: String = "",
+  case class Config(process: Boolean = false,
+                    workingDirectory: String = "",
                     partnerId: String = "",
-                    outputFolderName: String = "results",
+                    processedFolder: String = "results",
                     dateStr: String = today,
                     regexp: String = ".*[.gz]",
                     upload: Boolean = false,
@@ -17,13 +18,20 @@ object Runner extends App {
                     apiUrl: String = "https://target.my.com",
                     clientId: String = "",
                     clientSecret: String = "",
-                    subAccountName: Option[String] = None
+                    subAccountName: Option[String] = None,
+                    allowedSegments: Option[List[String]] = None,
+                    maxThreshold: Int = 5000000
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
   val parser = new scopt.OptionParser[Config]("mailru-segment-exporter") {
     head("mailru-segment-exporter")
     help("help") text "prints this usage text"
+
+    opt[Unit]('w', "process")
+      .valueName("<process>")
+      .action({ (_, config) => config.copy(process = true) })
+      .text("process segments from files. false by default")
     opt[String]('i', "workdir")
       .valueName("<workdir>")
       .action({ (value, config) => config.copy(workingDirectory = value) })
@@ -32,10 +40,10 @@ object Runner extends App {
       .valueName("<partner>")
       .action({ (value, config) => config.copy(partnerId = value) })
       .text("mailru partner prefix, will be first line of each processed file")
-    opt[String]('o', "outputname")
-      .valueName("<outputname>")
-      .action({ (value, config) => config.copy(outputFolderName = value) })
-      .text("output folder name with parsing results. 'results' by default")
+    opt[String]('o', "processedfolder")
+      .valueName("<processedfolder>")
+      .action({ (value, config) => config.copy(processedFolder = value) })
+      .text("folder name with parsing results. 'results' by default")
     opt[String]('d', "date")
       .valueName("<date>")
       .action({ (value, config) => config.copy(dateStr = value) })
@@ -44,6 +52,10 @@ object Runner extends App {
       .valueName("<regexp>")
       .action({ (value, config) => config.copy(regexp = value) })
       .text("source filename pattern in workdir, default .*(.gz)$")
+    opt[String]('g', "allowedsegments")
+      .valueName("<allowedsegments>")
+      .action({ (value, config) => config.copy(allowedSegments = Some(List(value.split(','): _*))) })
+      .text("comma-separated allowed segment ids for upload . empty = all. empty by default")
     opt[Unit]('u', "upload")
       .valueName("<upload>")
       .action({ (_, config) => config.copy(upload = true) })
@@ -68,16 +80,23 @@ object Runner extends App {
       .valueName("<minion>")
       .action({ (value, config) => config.copy(subAccountName = Some(value)) })
       .text("subaccount name for agencies")
+    opt[Int]('t', "maxthreshold")
+      .valueName("<maxthreshold>")
+      .action({ (value, config) => config.copy(maxThreshold = value) })
+      .text("max segmentfile line count")
+
 
     checkConfig(c =>
-      if (c.upload && c.auditoryUpdate) {
-        failure("only one mode accepted: upload or auditoryupdate")
-      } else if (c.upload && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
-        failure("you want to upload but not set clientId or clientSecret")
-      } else if (!c.auditoryUpdate && (c.workingDirectory.isEmpty || c.partnerId.isEmpty)) {
-        failure("you want process file but not set workingDirectory or partnerId")
-      } else if (!c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty || c.clientSecret.isEmpty)) {
-        println("you set clientId or clientSecret but not set -u option, files will not be uploaded")
+      if ((c.process || c.upload) && c.auditoryUpdate) {
+        failure("you can only (process or/and upload) or auditoryupdate")
+      } else if ((c.upload || c.auditoryUpdate) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
+        failure("you want to upload/auditoryupdate but not set clientId or clientSecret")
+      } else if ((c.process || c.upload) && c.workingDirectory.isEmpty) {
+        failure("you want process or upload file but not set workdir")
+      } else if (c.process && c.partnerId.isEmpty) {
+        failure("you want process file but not set partner")
+      } else if (!c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty || !c.clientSecret.isEmpty)) {
+        println("you set clientId or clientSecret but not set -u or -y option, files will not be uploaded")
         success
       } else {
         success
