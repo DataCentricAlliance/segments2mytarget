@@ -25,8 +25,8 @@ trait MailRuApiProvider extends SimpleLogger {
       case None => apiUrl
     }
 
-  private[this] val defaultConnectionTimeout = 30 * 1000
-  private[this] val defaultReadTimeout = 30 * 1000
+  private[this] val defaultConnectionTimeout = 300 * 1000
+  private[this] val defaultReadTimeout = 300 * 1000
 
   class MailRuRequestHelper(val request: HttpRequest) {
     def addAuthToken(token: String): HttpRequest = auth(request, token)
@@ -34,6 +34,10 @@ trait MailRuApiProvider extends SimpleLogger {
     def setTimeouts(connectionTimeout: Int = defaultConnectionTimeout, readTimeout: Int = defaultReadTimeout): HttpRequest =
       request.option(HttpOptions.connTimeout(defaultConnectionTimeout))
         .option(HttpOptions.readTimeout(defaultReadTimeout))
+
+    def tryAsString: HttpResponse[String] = {
+      Try {request.asString}.getOrElse(HttpResponse("Error occurred during request", 500, Map.empty))
+    }
   }
 
   implicit def requestToAuthAndWithLimitsRequest(req: HttpRequest): MailRuRequestHelper = new MailRuRequestHelper(req)
@@ -46,7 +50,7 @@ trait MailRuApiProvider extends SimpleLogger {
       .params("grant_type" -> "client_credentials", "client_id" -> clientId, "client_secret" -> clientSecret)
       .setTimeouts()
       .postForm
-      .asString
+      .tryAsString
 
     if (response.isSuccess) {
       response.body.decodeOption[MailRuAuthResponse] match {
@@ -63,7 +67,7 @@ trait MailRuApiProvider extends SimpleLogger {
     val findUserListsResponse = Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
       .addAuthToken(authToken)
       .setTimeouts()
-      .asString
+      .tryAsString
 
     if (findUserListsResponse.isSuccess) {
       findUserListsResponse.body.decodeOption[List[RemarketingUserListResponseItem]]
@@ -76,7 +80,7 @@ trait MailRuApiProvider extends SimpleLogger {
     val existedRemarketings = Http(s"$clientApiUrl/api/v1/remarketings.json")
       .addAuthToken(authToken)
       .setTimeouts()
-      .asString
+      .tryAsString
 
     existedRemarketings.body.decodeOption[List[RemarketingAuditoryItem]]
   }
@@ -87,7 +91,7 @@ trait MailRuApiProvider extends SimpleLogger {
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
       .setTimeouts()
-      .asString
+      .tryAsString
 
     if (createResponse.isSuccess) {
       Option(createResponse.body)
@@ -102,7 +106,7 @@ trait MailRuApiProvider extends SimpleLogger {
       .postData(request.asJson.toString())
       .addAuthToken(authToken)
       .setTimeouts()
-      .asString
+      .tryAsString
 
     if (updateResponse.isSuccess) {
       Option(updateResponse.body)
@@ -127,7 +131,7 @@ trait MailRuApiProvider extends SimpleLogger {
               MultiPart("file", name, "application/text", array),
               MultiPart("name", "", "", name),
               MultiPart("type", "", "", "dmp_id"))
-            .asString
+            .tryAsString
         val overLimitValidation = result.body.decodeValidation[OverTheLimitResponse]
         val goodItemValidation = result.body.decodeValidation[RemarketingUserListResponseItem]
         if (goodItemValidation.isSuccess) {
@@ -147,4 +151,20 @@ trait MailRuApiProvider extends SimpleLogger {
     }
   }
 
+  protected def deleteRemarketingUsersList(authToken: String, usersListId: Int): Boolean = {
+    val deleteUsersListResponse = Http(s"$clientApiUrl/api/v1/remarketing_users_list/$usersListId.json")
+      .method("DELETE")
+      .addAuthToken(authToken)
+      .setTimeouts()
+      .tryAsString
+
+    if (deleteUsersListResponse.code == 204) {
+      true
+    } else {
+      log.error(s"Code: ${deleteUsersListResponse.code}")
+      log.error(deleteUsersListResponse.body)
+
+      false
+    }
+  }
 }

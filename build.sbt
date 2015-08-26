@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   "com.github.scopt" %% "scopt" % "3.3.0",
   "io.argonaut" %% "argonaut" % "6.0.4",
   "commons-io" % "commons-io" % "2.4",
-  "org.apache.commons" % "commons-lang3" % "3.3.2"
+  "org.apache.commons" % "commons-lang3" % "3.3.2",
+  "joda-time" % "joda-time" % "2.8.2"
 )
 
 mainClass in assembly := Some("net.facetz.mailru.Runner")

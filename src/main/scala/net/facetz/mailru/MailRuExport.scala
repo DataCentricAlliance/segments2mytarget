@@ -2,9 +2,9 @@ package net.facetz.mailru
 
 import java.io.File
 
-import net.facetz.mailru.auditory.MailRuAuditoryUpdater
+import net.facetz.mailru.auditory.{MailRuAuditoryCleaner, MailRuAuditoryUpdater}
 import net.facetz.mailru.helper.{MailRuApiConfigProvider, SimpleLogger}
-import net.facetz.mailru.segment.{SegmentFileProvider, MailRuSegmentFileUploader, MailRuSegmentFileProcessor}
+import net.facetz.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader, SegmentFileProvider}
 
 object MailRuExport extends SimpleLogger {
 
@@ -50,6 +50,8 @@ object MailRuExport extends SimpleLogger {
   def run(): Unit = {
     log.info("mailRuExporter running...")
 
+    var possibleBadFlags = false
+
     if (ConfigHolder.config.auditoryUpdate) {
       auditoryUpdater.run()
     } else {
@@ -60,6 +62,20 @@ object MailRuExport extends SimpleLogger {
       } else if (ConfigHolder.config.upload) {
         new Exporter().startProcessing()
       } else {
+        possibleBadFlags = true
+      }
+    }
+
+    if (ConfigHolder.config.clean && ConfigHolder.config.expiryPeriodInDays.isDefined) {
+      val cleaner = new MailRuAuditoryCleaner with MailRuApiConfigProvider {
+        override protected val periodInDays = ConfigHolder.config.expiryPeriodInDays.get
+      }
+      cleaner.run()
+    } else {
+      if (ConfigHolder.config.clean && ConfigHolder.config.expiryPeriodInDays.isEmpty) {
+        log.error("expiry period (-e) should be specified in order to perform cleaning")
+      }
+      if (possibleBadFlags) {
         log.error(s"bad flags mode: ${ConfigHolder.config}")
       }
     }
