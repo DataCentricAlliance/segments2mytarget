@@ -95,9 +95,12 @@ object Runner extends App {
       .action({ (value, config) => config.copy(expiryPeriodInDays = value) })
       .text("expiry period for files in days. default: 30 days")
 
+    def onlyOneIsTrue(conditions: Boolean*): Boolean = {
+      conditions.count(b => b) == 1
+    }
 
     checkConfig(c =>
-      if (!((c.process || c.upload) ^ c.auditoryUpdate ^ c.clean) || ((c.process || c.upload) && c.auditoryUpdate && c.clean)) {
+      if (!onlyOneIsTrue(c.process || c.upload, c.auditoryUpdate, c.clean)) {
         failure("you can only (process or/and upload) or auditoryupdate or clean")
       } else if ((c.upload || c.auditoryUpdate || c.clean) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
         failure("you want to upload/auditoryupdate/clean but not set clientId or clientSecret")
