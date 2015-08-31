@@ -15,12 +15,14 @@ object Runner extends App {
                     regexp: String = ".*[.gz]",
                     upload: Boolean = false,
                     auditoryUpdate: Boolean = false,
+                    clean: Boolean = false,
                     apiUrl: String = "https://target.my.com",
                     clientId: String = "",
                     clientSecret: String = "",
                     subAccountName: Option[String] = None,
                     allowedSegments: Option[List[String]] = None,
-                    maxThreshold: Int = 5000000
+                    maxThreshold: Int = 5000000,
+                    expiryPeriodInDays: Int = 30
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -84,19 +86,30 @@ object Runner extends App {
       .valueName("<maxthreshold>")
       .action({ (value, config) => config.copy(maxThreshold = value) })
       .text("max segmentfile line count")
+    opt[Unit]('l', "clean")
+      .valueName("<clean>")
+      .action({ (_, config) => config.copy(clean = true) })
+      .text("clean expired files and update auditories. false by default")
+    opt[Int]('e', "expiryperiod")
+      .valueName("<expiryperiod>")
+      .action({ (value, config) => config.copy(expiryPeriodInDays = value) })
+      .text("expiry period for files in days. default: 30 days")
 
+    def onlyOneIsTrue(conditions: Boolean*): Boolean = {
+      conditions.count(b => b) == 1
+    }
 
     checkConfig(c =>
-      if ((c.process || c.upload) && c.auditoryUpdate) {
-        failure("you can only (process or/and upload) or auditoryupdate")
-      } else if ((c.upload || c.auditoryUpdate) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
-        failure("you want to upload/auditoryupdate but not set clientId or clientSecret")
+      if (!onlyOneIsTrue(c.process || c.upload, c.auditoryUpdate, c.clean)) {
+        failure("you can only (process or/and upload) or auditoryupdate or clean")
+      } else if ((c.upload || c.auditoryUpdate || c.clean) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
+        failure("you want to upload/auditoryupdate/clean but not set clientId or clientSecret")
       } else if ((c.process || c.upload) && c.workingDirectory.isEmpty) {
         failure("you want process or upload file but not set workdir")
       } else if (c.process && c.partnerId.isEmpty) {
         failure("you want process file but not set partner")
-      } else if (!c.upload && !c.auditoryUpdate && (!c.clientId.isEmpty || !c.clientSecret.isEmpty)) {
-        println("you set clientId or clientSecret but not set -u or -y option, files will not be uploaded")
+      } else if (!c.upload && !c.auditoryUpdate && !c.clean && (!c.clientId.isEmpty || !c.clientSecret.isEmpty)) {
+        println("you set clientId or clientSecret but not set -u or -y or -l option, files will not be uploaded or deleted")
         success
       } else {
         success

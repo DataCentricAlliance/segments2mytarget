@@ -2,9 +2,9 @@ package net.facetz.mailru
 
 import java.io.File
 
-import net.facetz.mailru.auditory.MailRuAuditoryUpdater
+import net.facetz.mailru.auditory.{MailRuAuditoryCleaner, MailRuAuditoryUpdater}
 import net.facetz.mailru.helper.{MailRuApiConfigProvider, SimpleLogger}
-import net.facetz.mailru.segment.{SegmentFileProvider, MailRuSegmentFileUploader, MailRuSegmentFileProcessor}
+import net.facetz.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader, SegmentFileProvider}
 
 object MailRuExport extends SimpleLogger {
 
@@ -47,8 +47,14 @@ object MailRuExport extends SimpleLogger {
     override protected val dateStr = ConfigHolder.config.dateStr
   }
 
+  val cleaner = new MailRuAuditoryCleaner with MailRuApiConfigProvider {
+    override protected val periodInDays = ConfigHolder.config.expiryPeriodInDays
+  }
+
   def run(): Unit = {
     log.info("mailRuExporter running...")
+
+    var possibleBadFlags = false
 
     if (ConfigHolder.config.auditoryUpdate) {
       auditoryUpdater.run()
@@ -59,6 +65,8 @@ object MailRuExport extends SimpleLogger {
         new FilesTransformer().startProcessing()
       } else if (ConfigHolder.config.upload) {
         new Exporter().startProcessing()
+      } else if (ConfigHolder.config.clean) {
+        cleaner.run()
       } else {
         log.error(s"bad flags mode: ${ConfigHolder.config}")
       }

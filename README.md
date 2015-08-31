@@ -54,6 +54,10 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
            subaccount name for agencies
      -t <maxthreshold> | --maxthreshold <maxthreshold>
            max segmentfile line count
+     -l <clean> | --clean <clean>
+           clean expired files and update auditories. false by default
+     -e <expiryperiod> | --expiryperiod <expiryperiod>
+           expiry period for files in days. default: 30 days
 
 ```
 
