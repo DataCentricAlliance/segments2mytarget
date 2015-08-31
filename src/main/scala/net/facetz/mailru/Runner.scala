@@ -22,7 +22,7 @@ object Runner extends App {
                     subAccountName: Option[String] = None,
                     allowedSegments: Option[List[String]] = None,
                     maxThreshold: Int = 5000000,
-                    expiryPeriodInDays: Option[Int] = None
+                    expiryPeriodInDays: Int = 30
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -89,15 +89,16 @@ object Runner extends App {
     opt[Unit]('l', "clean")
       .valueName("<clean>")
       .action({ (_, config) => config.copy(clean = true) })
+      .text("clean expired files and update auditories. false by default")
     opt[Int]('e', "expiryperiod")
       .valueName("<expiryperiod>")
-      .action({ (value, config) => config.copy(expiryPeriodInDays = Some(value)) })
-      .text("expiry period for files in days")
+      .action({ (value, config) => config.copy(expiryPeriodInDays = value) })
+      .text("expiry period for files in days. default: 30 days")
 
 
     checkConfig(c =>
-      if ((c.process || c.upload) && c.auditoryUpdate) {
-        failure("you can only (process or/and upload) or auditoryupdate")
+      if (!((c.process || c.upload) ^ c.auditoryUpdate ^ c.clean) || ((c.process || c.upload) && c.auditoryUpdate && c.clean)) {
+        failure("you can only (process or/and upload) or auditoryupdate or clean")
       } else if ((c.upload || c.auditoryUpdate || c.clean) && (c.clientId.isEmpty || c.clientSecret.isEmpty)) {
         failure("you want to upload/auditoryupdate/clean but not set clientId or clientSecret")
       } else if ((c.process || c.upload) && c.workingDirectory.isEmpty) {

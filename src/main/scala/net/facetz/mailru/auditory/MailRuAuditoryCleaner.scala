@@ -28,10 +28,9 @@ trait MailRuAuditoryCleaner extends MailRuApiProvider with SimpleLogger {
     val regex = """.*segment.*_(\d+)_(\d{8})_.*""".r
     val dateParser = DateTimeFormat.forPattern("yyyyMMdd")
     val optResponse = getRemarketingUsersList(authToken)
-    val response = optResponse match {
-      case Some(r) => r
-      case None => throw new RuntimeException(s"can't deserialize response to RemarketingUserListResponseItem")
-    }
+    val response = optResponse.getOrElse(
+      throw new RuntimeException(s"can't deserialize response to RemarketingUserListResponseItem")
+    )
 
     val latestDate = DateTime.now().minusDays(periodInDays)
     response
@@ -44,10 +43,9 @@ trait MailRuAuditoryCleaner extends MailRuApiProvider with SimpleLogger {
   }
 
   protected def updateAuditoriesWithExpiredUsers(token: String, expiredUsersIds: Set[Int]): Unit = {
-    val existedRemarketingsAuditory = getRemarketingAuditories(token) match {
-      case Some(response) => response
-      case None => throw new RuntimeException(s"can't deserialize response to RemarketingAuditoryResponse")
-    }
+    val existedRemarketingsAuditory = getRemarketingAuditories(token).getOrElse(
+      throw new RuntimeException(s"can't deserialize response to RemarketingAuditoryResponse")
+    )
 
     val expiredIdsInAuditories = existedRemarketingsAuditory
       .filter(auditory => auditoryPattern.pattern.matcher(auditory.name).matches())
@@ -88,11 +86,11 @@ trait MailRuAuditoryCleaner extends MailRuApiProvider with SimpleLogger {
 
     log.info(s"${unattachedIds.size} unattached expired files")
 
-    deleteExpiredUsers(token, expiredIdsInAuditories)
-    deleteExpiredUsers(token, unattachedIds)
+    deleteExpiredUsersLists(token, expiredIdsInAuditories)
+    deleteExpiredUsersLists(token, unattachedIds)
   }
 
-  protected def deleteExpiredUsers(token: String, expiredUsersIds: Set[Int]): Unit = {
+  protected def deleteExpiredUsersLists(token: String, expiredUsersIds: Set[Int]): Unit = {
     expiredUsersIds.foreach(id => {
       log.info(s"deleting usersList: $id")
       val success = deleteRemarketingUsersList(token, id)

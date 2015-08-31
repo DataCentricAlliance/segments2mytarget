@@ -47,6 +47,10 @@ object MailRuExport extends SimpleLogger {
     override protected val dateStr = ConfigHolder.config.dateStr
   }
 
+  val cleaner = new MailRuAuditoryCleaner with MailRuApiConfigProvider {
+    override protected val periodInDays = ConfigHolder.config.expiryPeriodInDays
+  }
+
   def run(): Unit = {
     log.info("mailRuExporter running...")
 
@@ -61,21 +65,9 @@ object MailRuExport extends SimpleLogger {
         new FilesTransformer().startProcessing()
       } else if (ConfigHolder.config.upload) {
         new Exporter().startProcessing()
+      } else if (ConfigHolder.config.clean) {
+        cleaner.run()
       } else {
-        possibleBadFlags = true
-      }
-    }
-
-    if (ConfigHolder.config.clean && ConfigHolder.config.expiryPeriodInDays.isDefined) {
-      val cleaner = new MailRuAuditoryCleaner with MailRuApiConfigProvider {
-        override protected val periodInDays = ConfigHolder.config.expiryPeriodInDays.get
-      }
-      cleaner.run()
-    } else {
-      if (ConfigHolder.config.clean && ConfigHolder.config.expiryPeriodInDays.isEmpty) {
-        log.error("expiry period (-e) should be specified in order to perform cleaning")
-      }
-      if (possibleBadFlags) {
         log.error(s"bad flags mode: ${ConfigHolder.config}")
       }
     }

@@ -6,7 +6,8 @@ import argonaut.Argonaut._
 import net.facetz.mailru.helper.SimpleLogger
 import org.apache.commons.io.IOUtils
 
-import scala.util.Try
+import scala.util.{Failure, Try}
+import scala.util.control.NonFatal
 import scalaj.http._
 
 trait MailRuApiProvider extends SimpleLogger {
@@ -35,8 +36,14 @@ trait MailRuApiProvider extends SimpleLogger {
       request.option(HttpOptions.connTimeout(defaultConnectionTimeout))
         .option(HttpOptions.readTimeout(defaultReadTimeout))
 
+    def logError[U]: PartialFunction[Throwable, Try[U]] = {
+      case NonFatal(e) =>
+        log.error("Error during http request: ", e)
+        Failure(e)
+    }
+
     def tryAsString: HttpResponse[String] = {
-      Try {request.asString}.getOrElse(HttpResponse("Error occurred during request", 500, Map.empty))
+      Try {request.asString}.recoverWith(logError).getOrElse(HttpResponse("Error occurred during request", 500, Map.empty))
     }
   }
 
@@ -158,13 +165,6 @@ trait MailRuApiProvider extends SimpleLogger {
       .setTimeouts()
       .tryAsString
 
-    if (deleteUsersListResponse.code == 204) {
-      true
-    } else {
-      log.error(s"Code: ${deleteUsersListResponse.code}")
-      log.error(deleteUsersListResponse.body)
-
-      false
-    }
+    deleteUsersListResponse.code == 204
   }
 }
