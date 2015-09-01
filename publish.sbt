@@ -1,7 +1,7 @@
 publishMavenStyle := true
 
 publishTo := {
-  val nexus = "http://repo:8081/nexus/"
+  val nexus = "http://repodirect:8081/nexus/"
   if (isSnapshot.value) {
     Some("snapshots" at nexus + "content/repositories/snapshots")
   } else {

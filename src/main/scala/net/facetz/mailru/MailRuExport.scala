@@ -6,6 +6,8 @@ import net.facetz.mailru.auditory.{MailRuAuditoryCleaner, MailRuAuditoryUpdater}
 import net.facetz.mailru.helper.{MailRuApiConfigProvider, SimpleLogger}
 import net.facetz.mailru.segment.{MailRuSegmentFileProcessor, MailRuSegmentFileUploader, SegmentFileProvider}
 
+import scala.util.control.NonFatal
+
 object MailRuExport extends SimpleLogger {
 
   trait MailRuSegmentFileConfigProvider {
@@ -56,20 +58,24 @@ object MailRuExport extends SimpleLogger {
 
     var possibleBadFlags = false
 
-    if (ConfigHolder.config.auditoryUpdate) {
-      auditoryUpdater.run()
-    } else {
-      if (ConfigHolder.config.process && ConfigHolder.config.upload) {
-        new TransformerAndExporter().startProcessing()
-      } else if (ConfigHolder.config.process) {
-        new FilesTransformer().startProcessing()
-      } else if (ConfigHolder.config.upload) {
-        new Exporter().startProcessing()
-      } else if (ConfigHolder.config.clean) {
-        cleaner.run()
+    try {
+      if (ConfigHolder.config.auditoryUpdate) {
+        auditoryUpdater.run()
       } else {
-        log.error(s"bad flags mode: ${ConfigHolder.config}")
+        if (ConfigHolder.config.process && ConfigHolder.config.upload) {
+          new TransformerAndExporter().startProcessing()
+        } else if (ConfigHolder.config.process) {
+          new FilesTransformer().startProcessing()
+        } else if (ConfigHolder.config.upload) {
+          new Exporter().startProcessing()
+        } else if (ConfigHolder.config.clean) {
+          cleaner.run()
+        } else {
+          log.error(s"bad flags mode: ${ConfigHolder.config}")
+        }
       }
+    } catch {
+      case NonFatal(t) => log.error("some error detected", t)
     }
 
     log.info("mailRuExporter finished!")
