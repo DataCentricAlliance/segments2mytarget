@@ -22,7 +22,8 @@ object Runner extends App {
                     subAccountName: Option[String] = None,
                     allowedSegments: Option[List[String]] = None,
                     maxThreshold: Int = 5000000,
-                    expiryPeriodInDays: Int = 30
+                    expiryPeriodInDays: Int = 30,
+                    tokenPath: String = "./mytarget_token.json"
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -94,6 +95,10 @@ object Runner extends App {
       .valueName("<expiryperiod>")
       .action({ (value, config) => config.copy(expiryPeriodInDays = value) })
       .text("expiry period for files in days. default: 30 days")
+    opt[String]("tokenpath")
+      .valueName("tokenpath")
+      .action({ (value, config) => config.copy(tokenPath = value)})
+      .text("Path to file where token is stored. default: ./mytarget_token.json")
 
     def onlyOneIsTrue(conditions: Boolean*): Boolean = {
       conditions.count(b => b) == 1
