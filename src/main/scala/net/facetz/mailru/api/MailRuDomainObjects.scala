@@ -3,11 +3,15 @@ package net.facetz.mailru.api
 import argonaut.Argonaut._
 import argonaut._
 
-case class MailRuAuthResponse(access_token: String, refresh_token: String)
+case class MailRuAuthResponse(access_token: String,
+                              token_type: String,
+                              scope: String,
+                              expires_in: String,
+                              refresh_token: String)
 
 object MailRuAuthResponse {
   implicit def MailRuAuthResponseCodecJson: CodecJson[MailRuAuthResponse] =
-    casecodec2(MailRuAuthResponse.apply, MailRuAuthResponse.unapply)("access_token", "refresh_token")
+    casecodec5(MailRuAuthResponse.apply, MailRuAuthResponse.unapply)("access_token", "token_type", "scope", "expires_in", "refresh_token")
 }
 
 

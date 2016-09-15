@@ -63,7 +63,7 @@ trait MailRuApiProvider extends SimpleLogger {
         log.info(s"Could not get token from file $tokenFilePath. Please check path to file and file content. ")
         getNewAuthToken
     }
-    
+
     freshToken.map { newToken =>
       writeTokenToFile(newToken)
       log.info(s"Successfully updated token in file $tokenFilePath")
