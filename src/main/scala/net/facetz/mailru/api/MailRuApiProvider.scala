@@ -125,13 +125,18 @@ trait MailRuApiProvider extends SimpleLogger {
   }
 
   protected def writeTokenToFile(token: MailRuAuthResponse): Unit = {
-    log.info(s"Trying to write fresh token to file $tokenFilePath")
-    val file = new File(tokenFilePath)
-    val bw = new BufferedWriter(new FileWriter(file))
     try {
-      bw.write(token.asJson.toString())
-    } finally {
-      bw.close()
+      log.info(s"Trying to write fresh token to file $tokenFilePath")
+      val file = new File(tokenFilePath)
+      val bw = new BufferedWriter(new FileWriter(file))
+      try {
+        bw.write(token.asJson.toString())
+      } finally {
+        bw.close()
+      }
+    } catch {
+      case NonFatal(ex) =>
+        log.error(s"Failed to write updated token to file $tokenFilePath. Token: ${token.asJson.toString()}")
     }
   }
 
