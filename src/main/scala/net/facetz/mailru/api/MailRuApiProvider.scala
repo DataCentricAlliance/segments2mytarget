@@ -63,13 +63,12 @@ trait MailRuApiProvider extends SimpleLogger {
         log.info(s"Could not get token from file $tokenFilePath. Please check path to file and file content. ")
         getNewAuthToken
     }
-
-    freshToken.foreach { newToken =>
-        writeTokenToFile(newToken)
-        log.info(s"Successfully updated token in file $tokenFilePath")
+    
+    freshToken.map { newToken =>
+      writeTokenToFile(newToken)
+      log.info(s"Successfully updated token in file $tokenFilePath")
+      newToken.access_token
     }
-
-    freshToken.map(_.access_token)
   }
 
   protected def getNewAuthToken: Option[MailRuAuthResponse] = {
@@ -136,7 +135,8 @@ trait MailRuApiProvider extends SimpleLogger {
       }
     } catch {
       case NonFatal(ex) =>
-        log.error(s"Failed to write updated token to file $tokenFilePath. Token: ${token.asJson.toString()}")
+        log.error(s"Failed to write updated token to file $tokenFilePath. Token: ${token.asJson.toString()}", ex)
+        throw ex
     }
   }
 
