@@ -12,4 +12,6 @@ trait MailRuApiConfigProvider {
   override protected val clientId = config.clientId
   override protected val clientSecret = config.clientSecret
   override protected val subAccountName = config.subAccountName
+  override protected val tokenFilePath = config.tokenFilePath
+
 }

@@ -1,6 +1,6 @@
 package net.facetz.mailru.api
 
-import java.io.{File, FileInputStream, IOException}
+import java.io._
 
 import argonaut.Argonaut._
 import net.facetz.mailru.helper.SimpleLogger
@@ -19,6 +19,8 @@ trait MailRuApiProvider extends SimpleLogger {
   protected def clientSecret: String
 
   protected def subAccountName: Option[String]
+
+  protected def tokenFilePath: String
 
   def clientApiUrl: String =
     subAccountName match {
@@ -51,7 +53,27 @@ trait MailRuApiProvider extends SimpleLogger {
 
   protected def auth(req: HttpRequest, token: String) = req.header("Authorization", s"Bearer $token")
 
+
   protected def getAuthToken: Option[String] = {
+    val freshToken = getTokenFromFile match {
+      case Some(oldToken) =>
+        log.info(s"Got existing token from file $tokenFilePath")
+        refreshAuthToken(oldToken)
+      case None =>
+        log.info(s"Could not get token from file $tokenFilePath. Please check path to file and file content. ")
+        getNewAuthToken
+    }
+
+    freshToken.map { newToken =>
+      writeTokenToFile(newToken)
+      log.info(s"Successfully updated token in file $tokenFilePath")
+      newToken.access_token
+    }
+  }
+
+  protected def getNewAuthToken: Option[MailRuAuthResponse] = {
+    log.info("About to fetch new auth token because no existing token found.")
+
     val response = Http(s"$apiUrl/api/v2/oauth2/token.json")
       .headers("Content-Type" -> "application/x-www-form-urlencoded")
       .params("grant_type" -> "client_credentials", "client_id" -> clientId, "client_secret" -> clientSecret)
@@ -60,13 +82,61 @@ trait MailRuApiProvider extends SimpleLogger {
       .tryAsString
 
     if (response.isSuccess) {
-      response.body.decodeOption[MailRuAuthResponse] match {
-        case Some(auth) => Option(auth.access_token)
-        case None => None
-      }
+      response.body.decodeOption[MailRuAuthResponse]
     } else {
-      log.error(response.body)
+      log.error(s"Unable to fetch new token: ${response.body}")
       None
+    }
+  }
+
+  protected def refreshAuthToken(oldToken: MailRuAuthResponse): Option[MailRuAuthResponse] = {
+    log.info("About to refresh existing auth token")
+
+    val response = Http(s"$apiUrl/api/v2/oauth2/token.json")
+      .headers("Content-Type" -> "application/x-www-form-urlencoded")
+      .params("grant_type" -> "refresh_token", "refresh_token" -> oldToken.refresh_token, "client_id" -> clientId, "client_secret" -> clientSecret)
+      .setTimeouts()
+      .postForm
+      .tryAsString
+
+    if (response.isSuccess) {
+      response.body.decodeOption[MailRuAuthResponse]
+    } else {
+      log.error(s"Unable to refresh token: ${response.body}")
+      None
+    }
+  }
+
+  protected def getTokenFromFile: Option[MailRuAuthResponse] = {
+    try {
+      val source = scala.io.Source.fromFile(tokenFilePath)
+      try {
+        val fileContent = source.mkString
+        fileContent.decodeOption[MailRuAuthResponse]
+      } finally {
+        source.close()
+      }
+    } catch {
+      case NonFatal(ex) =>
+        log.error(s"Unable to find token file $tokenFilePath")
+        None
+    }
+  }
+
+  protected def writeTokenToFile(token: MailRuAuthResponse): Unit = {
+    try {
+      log.info(s"Trying to write fresh token to file $tokenFilePath")
+      val file = new File(tokenFilePath)
+      val bw = new BufferedWriter(new FileWriter(file))
+      try {
+        bw.write(token.asJson.toString())
+      } finally {
+        bw.close()
+      }
+    } catch {
+      case NonFatal(ex) =>
+        log.error(s"Failed to write updated token to file $tokenFilePath. Token: ${token.asJson.toString()}", ex)
+        throw ex
     }
   }
 
