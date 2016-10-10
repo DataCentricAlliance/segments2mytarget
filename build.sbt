@@ -4,7 +4,7 @@ scalaVersion := "2.11.6"
 
 name := "mailru-segment-exporter"
 
-version := "1.4.11-SNAPSHOT"
+version := "1.4.12-SNAPSHOT"
 
 
 organization := "net.facetz"
@@ -18,10 +18,11 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "org.scalaj" %% "scalaj-http" % "1.1.4",
   "com.github.scopt" %% "scopt" % "3.3.0",
-  "io.argonaut" %% "argonaut" % "6.0.4",
+  "io.argonaut" %% "argonaut" % "6.1",
   "commons-io" % "commons-io" % "2.4",
   "org.apache.commons" % "commons-lang3" % "3.3.2",
-  "joda-time" % "joda-time" % "2.8.2"
+  "joda-time" % "joda-time" % "2.8.2",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
 
 mainClass in assembly := Some("net.facetz.mailru.Runner")

@@ -5,13 +5,13 @@ import argonaut._
 
 case class MailRuAuthResponse(access_token: String,
                               token_type: String,
-                              scope: String,
-                              expires_in: String,
+                              tokens_left: Option[Int],
+                              expires_in: Int,
                               refresh_token: String)
 
 object MailRuAuthResponse {
   implicit def MailRuAuthResponseCodecJson: CodecJson[MailRuAuthResponse] =
-    casecodec5(MailRuAuthResponse.apply, MailRuAuthResponse.unapply)("access_token", "token_type", "scope", "expires_in", "refresh_token")
+    casecodec5(MailRuAuthResponse.apply, MailRuAuthResponse.unapply)("access_token", "token_type", "tokens_left", "expires_in", "refresh_token")
 }
 
 

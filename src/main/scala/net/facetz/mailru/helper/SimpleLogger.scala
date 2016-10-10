@@ -25,6 +25,10 @@ class Log {
     log(s"ERROR: $msg")
   }
 
+  def warn(msg: String): Unit = {
+    log(s"WARN: $msg")
+  }
+
   def error(msg: String, t: Throwable): Unit = {
     error(msg)
     t.printStackTrace()
