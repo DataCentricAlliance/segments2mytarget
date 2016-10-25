@@ -3,6 +3,7 @@ package net.facetz.mailru.api
 import java.io._
 
 import argonaut.Argonaut._
+import argonaut.PrettyParams
 import net.facetz.mailru.helper.SimpleLogger
 import org.apache.commons.io.IOUtils
 
@@ -30,6 +31,7 @@ trait MailRuApiProvider extends SimpleLogger {
 
   private[this] val defaultConnectionTimeout = 300 * 1000
   private[this] val defaultReadTimeout = 300 * 1000
+  private[this] val storeTokenParams = PrettyParams.nospace.copy(dropNullKeys = true)
 
   class MailRuRequestHelper(val request: HttpRequest) {
     def addAuthToken(token: String): HttpRequest = auth(request, token)
@@ -129,7 +131,7 @@ trait MailRuApiProvider extends SimpleLogger {
       val file = new File(tokenFilePath)
       val bw = new BufferedWriter(new FileWriter(file))
       try {
-        bw.write(token.asJson.toString())
+        bw.write(token.asJson.pretty(storeTokenParams))
       } finally {
         bw.close()
       }
@@ -192,14 +194,19 @@ trait MailRuApiProvider extends SimpleLogger {
     }
   }
 
-
-  protected def uploadSegmentFile(authToken: String, file: File, name: String): Try[Either[OverTheLimitResponse,
+  /**
+    * @param baseListId - id of base list to join ids to:
+    *                   0 - this userList itself
+    *                   N - add ids to UserList id N
+    *                   -N - remove ids from UserList id N
+    */
+  protected def uploadSegmentFile(authToken: String, file: File, name: String, baseListId: Int): Try[Either[OverTheLimitResponse,
     RemarketingUserListResponseItem]] = {
     Try {
       val is = new FileInputStream(file)
 
       val result = try {
-        val array: Array[Byte] = IOUtils.toByteArray(is)
+        val array = IOUtils.toByteArray(is)
         val result: HttpResponse[String] =
           Http(s"$clientApiUrl/api/v1/remarketing_users_lists.json")
             .addAuthToken(authToken)
@@ -207,7 +214,8 @@ trait MailRuApiProvider extends SimpleLogger {
             .postMulti(
               MultiPart("file", name, "application/text", array),
               MultiPart("name", "", "", name),
-              MultiPart("type", "", "", "dmp_id"))
+              MultiPart("type", "", "", "dmp_id"),
+              MultiPart("base", "", "", baseListId.toString))
             .tryAsString
         val overLimitValidation = result.body.decodeValidation[OverTheLimitResponse]
         val goodItemValidation = result.body.decodeValidation[RemarketingUserListResponseItem]

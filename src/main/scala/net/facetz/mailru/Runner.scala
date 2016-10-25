@@ -23,7 +23,8 @@ object Runner extends App {
                     allowedSegments: Option[List[String]] = None,
                     maxThreshold: Int = 5000000,
                     expiryPeriodInDays: Int = 30,
-                    tokenFilePath: String = "mytarget_token.json"
+                    tokenFilePath: String = "mytarget_token.json",
+                    extractToBaseList: Boolean = false
                      )
 
   // args example: -i /tmp/gz -p dl -u -c someclient -s somesecret
@@ -99,6 +100,9 @@ object Runner extends App {
       .valueName("tokenfilepath")
       .action({ (value, config) => config.copy(tokenFilePath = value)})
       .text("path to file where token is stored. default: ./mytarget_token.json")
+    opt[Unit]('b', "baselistmapping")
+      .action({ (_, config) => config.copy(extractToBaseList = true)})
+      .text("Export users into existing base UserList for segment if such UserList exists")
 
     def onlyOneIsTrue(conditions: Boolean*): Boolean = {
       conditions.count(b => b) == 1

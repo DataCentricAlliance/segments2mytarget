@@ -21,7 +21,7 @@ trait SegmentFileProvider extends SegmentFileProcessor {
     val filesContainer: mutable.MultiMap[String, File] = new mutable.HashMap[String, mutable.Set[File]] with mutable.MultiMap[String, File]
     paths
       .map(t => t.name.split('_') -> t.jfile)
-      .map({ case (Array(_, segmentId, dateStr, _), file) => (segmentId, dateStr) -> file })
+      .map({ case (Array(_, segmentId, dateStr, _*), file) => (segmentId, dateStr) -> file })
       .filter({
         case ((segmentId, _), _) => allowedSegments match {
           case Some(list) => list.contains(segmentId)

@@ -60,6 +60,8 @@ java -jar target/scala-2.11/mailru-segment-exporter_2.11-<version>.jar --help
            expiry period for files in days. default: 30 days
      --tokenfilepath <tokenfilepath>
            path to file where token is stored. default: ./mytarget_token.json
+     -b <baselist> | --baselist <baselist>
+           Export users into existing base UserList for segment if such UserList exists
            
 
 ```
